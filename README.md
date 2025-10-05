@@ -90,6 +90,12 @@ Client (React) → API Layer (Express) → Business Logic (Controllers/Services)
 UI Components Route Handlers Middlewares Prisma Client
 State Management Axios Services Validation Data Models
 
+### Screenshots
+<img width="1855" height="911" alt="image" src="https://github.com/user-attachments/assets/f42928f6-b051-4406-ad57-d84d5e3e8521" />
+
+<img width="1852" height="921" alt="image" src="https://github.com/user-attachments/assets/2dc99f63-2949-4415-83cc-f065100e931f" />
+
+
 ### Database Design
 
 **Entity Relationship Model (simplified)**
