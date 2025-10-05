@@ -1,0 +1,164 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  avatar    String?
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ownedWorkspaces      Workspace[]
+  workspaceMemberships WorkspaceMember[]
+  boardMemberships     BoardMember[]
+  assignedCards        CardAssignment[]
+  comments             Comment[]
+  activities           Activity[]
+  Board                Board[]
+
+  @@map("users")
+}
+
+model Workspace {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  ownerId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  owner   User              @relation(fields: [ownerId], references: [id])
+  boards  Board[]
+  members WorkspaceMember[]
+
+  @@map("workspaces")
+}
+
+model WorkspaceMember {
+  id          String   @id @default(cuid())
+  workspaceId String
+  userId      String
+  role        String   @default("member")
+  joinedAt    DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
+
+  @@unique([workspaceId, userId])
+  @@map("workspace_members")
+}
+
+model Board {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  visibility  String   @default("private")
+  workspaceId String
+  ownerId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace  Workspace     @relation(fields: [workspaceId], references: [id])
+  owner      User          @relation(fields: [ownerId], references: [id])
+  members    BoardMember[]
+  lists      List[]
+  activities Activity[]
+  Card       Card[]
+
+  @@map("boards")
+}
+
+model BoardMember {
+  id       String   @id @default(cuid())
+  boardId  String
+  userId   String
+  role     String   @default("member")
+  joinedAt DateTime @default(now())
+
+  board Board @relation(fields: [boardId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@unique([boardId, userId])
+  @@map("board_members")
+}
+
+model List {
+  id        String   @id @default(cuid())
+  title     String
+  position  Float
+  boardId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  board Board  @relation(fields: [boardId], references: [id])
+  cards Card[]
+
+  @@map("lists")
+}
+
+model Card {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  position    Float
+  listId      String
+  boardId     String
+  dueDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  list        List             @relation(fields: [listId], references: [id])
+  board       Board            @relation(fields: [boardId], references: [id])
+  assignments CardAssignment[]
+  comments    Comment[]
+
+  @@map("cards")
+}
+
+model CardAssignment {
+  id     String @id @default(cuid())
+  cardId String
+  userId String
+
+  card Card @relation(fields: [cardId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([cardId, userId])
+  @@map("card_assignments")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  text      String
+  cardId    String
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  card   Card @relation(fields: [cardId], references: [id])
+  author User @relation(fields: [authorId], references: [id])
+
+  @@map("comments")
+}
+
+model Activity {
+  id        String   @id @default(cuid())
+  type      String
+  boardId   String
+  userId    String
+  data      Json
+  createdAt DateTime @default(now())
+
+  board Board @relation(fields: [boardId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@map("activities")
+}
